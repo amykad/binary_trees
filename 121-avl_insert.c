@@ -1,4 +1,3 @@
-/* 31. AVL - Insert */
 #include "binary_trees.h"
 
 
