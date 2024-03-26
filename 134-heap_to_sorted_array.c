@@ -1,53 +1,33 @@
+#include <stdlib.h>
 #include "binary_trees.h"
 
 /**
- * tree_size - measures the sum of heights of a binary tree
- * @tree: pointer to the root node of the tree to measure the height
+ * heap_to_sorted_array - Converts a Binary Max Heap to a sorted array of
+ * integers
  *
- * Return: Height or 0 if tree is NULL
+ * @heap: Pointer to the root node of the heap to convert
+ * @size: Address to store the size of the array
+ *
+ * Return: Pointer to a newly allocated array containing the sorted values, or
+ * NULL on failure
  */
-size_t tree_size(const binary_tree_t *tree)
-{
-	size_t height_l = 0;
-	size_t height_r = 0;
-
-	if (!tree)
-		return (0);
-
-	if (tree->left)
-		height_l = 1 + tree_size(tree->left);
-
-	if (tree->right)
-		height_r = 1 + tree_size(tree->right);
-
-	return (height_l + height_r);
-}
-
-/**
- * heap_to_sorted_array - converts a Binary Max Heap
- * to a sorted array of integers
- *
- * @heap: pointer to the root node of the heap to convert
- * @size: address to store the size of the array
- *
- * Return: pointer to array sorted in descending order
- **/
 int *heap_to_sorted_array(heap_t *heap, size_t *size)
 {
-	int i, *a = NULL;
+	int *arr = NULL;
 
-	if (!heap || !size)
+	*size = 0;
+	if (!heap)
 		return (NULL);
 
-	*size = tree_size(heap) + 1;
-
-	a = malloc(sizeof(int) * (*size));
-
-	if (!a)
+	arr = calloc(1, sizeof(int));
+	if (!arr)
 		return (NULL);
 
-	for (i = 0; heap; i++)
-		a[i] = heap_extract(&heap);
-
-	return (a);
+	while (heap)
+	{
+		arr = realloc(arr, sizeof(int) * (*size + 1));
+		arr[*size] = heap_extract(&heap);
+		*size += 1;
+	}
+	return (arr);
 }
