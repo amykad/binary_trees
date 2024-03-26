@@ -1,69 +1,128 @@
-#include "binary_tree.h"
-
+#include "binary_trees.h"
 /**
- * binary_tree_is_heap - checks if a binary tree is a valid Max Binary Heap
- *
- * @tree: pointer to root node of the tree to check
- *
- * Return: 1 if tree is a valid Max Binary Heap, 0 otherwise
+ * binary_tree_height - Function that measures the height of a binary tree
+ * @tree: tree to go through
+ * Return: the height
  */
-int binary_tree_is_heap(const binary_tree_t *tree)
+size_t binary_tree_height(const binary_tree_t *tree)
 {
-    if (tree == NULL)
-        return 0;
+	size_t l = 0;
+	size_t r = 0;
 
-    if (tree->left && tree->n < tree->left->n)
-        return 0;
-
-    if (tree->right && tree->n < tree->right->n)
-        return 0;
-
-    if (tree->left && !binary_tree_is_heap(tree->left))
-        return 0;
-
-    if (tree->right && !binary_tree_is_heap(tree->right))
-        return 0;
-
-    return 1;
+	if (tree == NULL)
+	{
+		return (0);
+	}
+	else
+	{
+		if (tree)
+		{
+			l = tree->left ? 1 + binary_tree_height(tree->left) : 0;
+			r = tree->right ? 1 + binary_tree_height(tree->right) : 0;
+		}
+		return ((l > r) ? l : r);
+	}
 }
-#include <stdio.h>
-#include "binary_tree.h"
-
 /**
- * main - entry point
- *
- * Return: always 0
+ * binary_tree_depth - depth of specified node from root
+ * @tree: node to check the depth
+ * Return: 0 is it is the root or number of depth
  */
-int main(void)
+size_t binary_tree_depth(const binary_tree_t *tree)
 {
-    binary_tree_t *binary_tree = NULL;
+	return ((tree && tree->parent) ? 1 + binary_tree_depth(tree->parent) : 0);
+}
+/**
+ * linked_node - this function makes a linked list from depth level and node
+ * @head: pointer to head of linked list
+ * @tree: node to store
+ * @level: depth of node to store
+ * Return: Nothing
+ */
+void linked_node(link_t **head, const binary_tree_t *tree, size_t level)
+{
+	link_t *new, *aux;
 
-    binary_tree_t *left_child = binary_tree_node(binary_tree, 7);
-    binary_tree_t *right_child = binary_tree_node(binary_tree, 3);
-    binary_tree_t *left_grandchild = binary_tree_node(left_child, 4);
-    binary_tree_t *right_grandchild = binary_tree_node(right_child, 8);
+	new = malloc(sizeof(link_t));
+	if (new == NULL)
+	{
+		return;
+	}
+	new->n = level;
+	new->node = tree;
+	if (*head == NULL)
+	{
+		new->next = NULL;
+		*head = new;
+	}
+	else
+	{
+		aux = *head;
+		while (aux->next != NULL)
+		{
+			aux = aux->next;
+		}
+		new->next = NULL;
+		aux->next = new;
+	}
+}
+/**
+ * recursion - goes through the complete tree and each stores each node
+ * in linked_node function
+ * @head: pointer to head of linked list
+ * @tree: node to check
+ * Return: Nothing by default it affects the pointer
+ */
+void recursion(link_t **head, const binary_tree_t *tree)
+{
+	size_t level = 0;
 
-    binary_tree_t *node_10 = binary_tree_node(right_grandchild, 10);
-    binary_tree_t *node_11 = binary_tree_node(node_10, 11);
+	if (tree != NULL)
+	{
+		level = binary_tree_depth(tree);
+		linked_node(head, tree, level);
+		recursion(head, tree->left);
+		recursion(head, tree->right);
+	}
+}
+/**
+ * binary_tree_levelorder - print the nodes element in a lever-order
+ * @tree: root node
+ * @func: function to use
+ * Return: Nothing
+ */
+void binary_tree_levelorder(const binary_tree_t *tree, void (*func)(int))
+{
+	link_t *head, *aux;
+	size_t height = 0, count = 0;
 
-    binary_tree = binary_tree_node(binary_tree, 5);
-    binary_tree_insert_left(binary_tree, 12);
-    binary_tree_insert_right(binary_tree, 19);
-    binary_tree_insert_left(binary_tree->right, 23);
-    binary_tree_insert_right(binary_tree->right, 40);
-
-    binary_tree_insert_left(left_grandchild, 1);
-    binary_tree_insert_right(left_grandchild, 6);
-    binary_tree_insert_left(left_child, left_grandchild);
-    binary_tree_insert_right(left_child, right_grandchild);
-    binary_tree_insert_right(right_child, node_10);
-
-    binary_tree_print(binary_tree);
-
-    if (binary_tree_is_heap(binary_tree))
-        printf("The binary tree is a valid Max Binary Heap.\n");
-    else
-        printf("The binary tree is not a valid Max Binary Heap.\n");
-
-    return 0;
+	if (!tree || !func)
+	{
+		return;
+	}
+	else
+	{
+		height = binary_tree_height(tree);
+		head = NULL;
+		recursion(&head, tree);
+		while (count <= height)
+		{
+			aux = head;
+			while (aux != NULL)
+			{
+				if (count == aux->n)
+				{
+					func(aux->node->n);
+				}
+				aux = aux->next;
+			}
+			count++;
+		}
+		while (head != NULL)
+		{
+			aux = head;
+			head = head->next;
+			free(aux);
+		}
+	}
 }
