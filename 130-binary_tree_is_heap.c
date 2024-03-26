@@ -1,142 +1,69 @@
-#include "binary_trees.h"
-
-/**
- * binary_tree_height - Function that measures the height of a binary tree
- * @tree: tree to go through
- * Return: the height
- */
-
-size_t binary_tree_height(const binary_tree_t *tree)
-{
-	size_t l = 0;
-	size_t r = 0;
-
-	if (tree == NULL)
-	{
-		return (0);
-	}
-	else
-	{
-		if (tree->left == NULL && tree->right == NULL)
-			return (tree->parent != NULL);
-		if (tree)
-		{
-			l = tree->left ? 1 + binary_tree_height(tree->left) : 0;
-			r = tree->right ? 1 + binary_tree_height(tree->right) : 0;
-		}
-		return ((l > r) ? l : r);
-		}
-}
-
-/**
- * binary_tree_balance - Measures balance factor of a binary tree
- * @tree: tree to go through
- * Return: balanced factor
- */
-int binary_tree_balance(const binary_tree_t *tree)
-{
-	int right = 0, left = 0, total = 0;
-
-	if (tree)
-	{
-		left = ((int)binary_tree_height(tree->left));
-		right = ((int)binary_tree_height(tree->right));
-		total = left - right;
-	}
-	return (total);
-}
-
-/**
- * tree_is_perfect - function that says if a tree is perfect or not
- * it has to be the same quantity of levels in left as right, and also
- * each node has to have 2 nodes or none
- * @tree: tree to check
- * Return: 0 if is not a perfect or other number that is the level of height
- */
-int tree_is_perfect(const binary_tree_t *tree)
-{
-	int l = 0, r = 0;
-
-	if (tree->left && tree->right)
-	{
-		l = 1 + tree_is_perfect(tree->left);
-		r = 1 + tree_is_perfect(tree->right);
-		if (r == l && r != 0 && l != 0)
-			return (r);
-		return (0);
-	}
-	else if (!tree->left && !tree->right)
-	{
-		return (1);
-	}
-	else
-	{
-		return (0);
-	}
-}
-
-/**
- * binary_tree_is_perfect - perfect or not a tree
- * @tree: tree to check
- * Return: 1 is it is or 0 if not
- */
-int binary_tree_is_perfect(const binary_tree_t *tree)
-{
-	int result = 0;
-
-	if (tree == NULL)
-	{
-		return (0);
-	}
-	else
-	{
-		result = tree_is_perfect(tree);
-		if (result != 0)
-		{
-			return (1);
-		}
-		return (0);
-	}
-}
+#include "binary_tree.h"
 
 /**
  * binary_tree_is_heap - checks if a binary tree is a valid Max Binary Heap
- * @tree: tree to check
- * Return: 1 is it is or 0 if not
+ *
+ * @tree: pointer to root node of the tree to check
+ *
+ * Return: 1 if tree is a valid Max Binary Heap, 0 otherwise
  */
 int binary_tree_is_heap(const binary_tree_t *tree)
 {
-	int bval;
+    if (tree == NULL)
+        return 0;
 
-	if (tree == NULL)
-	{
-		return (0);
-	}
-	if (tree->left && tree->left->n > tree->n)
-	{
-		return (0);
-	}
-	if (tree->right && tree->right->n > tree->n)
-	{
-		return (0);
-	}
-	if (binary_tree_is_perfect(tree))
-	{
-		return (1);
-	}
-	bval = binary_tree_balance(tree);
-	if (bval == 0)
-	{
-		return (binary_tree_is_perfect(tree->left)
-			&& binary_tree_is_heap(tree->right));
-	}
-	if (bval == 1)
-	{
-		return (binary_tree_is_heap(tree->left)
-			&& binary_tree_is_perfect(tree->right));
-	}
-	else
-	{
-		return (0);
-	}
+    if (tree->left && tree->n < tree->left->n)
+        return 0;
+
+    if (tree->right && tree->n < tree->right->n)
+        return 0;
+
+    if (tree->left && !binary_tree_is_heap(tree->left))
+        return 0;
+
+    if (tree->right && !binary_tree_is_heap(tree->right))
+        return 0;
+
+    return 1;
+}
+#include <stdio.h>
+#include "binary_tree.h"
+
+/**
+ * main - entry point
+ *
+ * Return: always 0
+ */
+int main(void)
+{
+    binary_tree_t *binary_tree = NULL;
+
+    binary_tree_t *left_child = binary_tree_node(binary_tree, 7);
+    binary_tree_t *right_child = binary_tree_node(binary_tree, 3);
+    binary_tree_t *left_grandchild = binary_tree_node(left_child, 4);
+    binary_tree_t *right_grandchild = binary_tree_node(right_child, 8);
+
+    binary_tree_t *node_10 = binary_tree_node(right_grandchild, 10);
+    binary_tree_t *node_11 = binary_tree_node(node_10, 11);
+
+    binary_tree = binary_tree_node(binary_tree, 5);
+    binary_tree_insert_left(binary_tree, 12);
+    binary_tree_insert_right(binary_tree, 19);
+    binary_tree_insert_left(binary_tree->right, 23);
+    binary_tree_insert_right(binary_tree->right, 40);
+
+    binary_tree_insert_left(left_grandchild, 1);
+    binary_tree_insert_right(left_grandchild, 6);
+    binary_tree_insert_left(left_child, left_grandchild);
+    binary_tree_insert_right(left_child, right_grandchild);
+    binary_tree_insert_right(right_child, node_10);
+
+    binary_tree_print(binary_tree);
+
+    if (binary_tree_is_heap(binary_tree))
+        printf("The binary tree is a valid Max Binary Heap.\n");
+    else
+        printf("The binary tree is not a valid Max Binary Heap.\n");
+
+    return 0;
 }
